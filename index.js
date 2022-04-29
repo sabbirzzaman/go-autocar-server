@@ -23,7 +23,14 @@ const run = async () => {
         await client.connect();
         const carsCollection = client.db('carsCollection').collection('cars');
 
-        
+        // api created for all cars item
+        app.get('/cars', async (req, res) => {
+            const query = {};
+            const cursor = carsCollection.find(query);
+            const result = await cursor.toArray();
+
+            res.send(result);
+        });
     } finally {
     }
 };
