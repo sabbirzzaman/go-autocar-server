@@ -50,6 +50,15 @@ const run = async () => {
             res.send(car);
         });
 
+        // Delete single car item
+        app.delete('/car/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)}
+            const result = await carsCollection.deleteOne(query)
+
+            res.send(result)
+        })
+
         // change car quantity
         app.put('/car/:id', async (req, res) => {
             const id = req.params.id;
