@@ -32,6 +32,15 @@ const run = async () => {
             res.send(result);
         });
 
+        // get the car details form the client side
+        app.post('/cars', async (req, res) => {
+            const car = req.body;
+            const result = await carsCollection.insertOne(car);
+
+            res.send(result);
+            console.log('successful');
+        });
+
         // single car by id
         app.get('/car/:id', async (req, res) => {
             const id = req.params.id;
@@ -39,7 +48,27 @@ const run = async () => {
             const car = await carsCollection.findOne(query);
 
             res.send(car);
-            console.log(car)
+        });
+
+        // change car quantity
+        app.put('/car/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedCars = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    quantity: updatedCars.quantity,
+                },
+            };
+
+            const result = await carsCollection.updateOne(
+                filter,
+                updatedDoc,
+                options
+            );
+
+            res.send(result);
         });
     } finally {
     }
