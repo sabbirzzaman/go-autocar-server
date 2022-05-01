@@ -32,13 +32,22 @@ const run = async () => {
             res.send(result);
         });
 
+        // api created for all cars item
+        app.get('/my-cars', async (req, res) => {
+            const email = req.query.email;
+            const query = { email };
+            const cursor = carsCollection.find(query);
+            const result = await cursor.toArray();
+
+            res.send(result);
+        });
+
         // get the car details form the client side
         app.post('/cars', async (req, res) => {
             const car = req.body;
             const result = await carsCollection.insertOne(car);
 
             res.send(result);
-            console.log('successful');
         });
 
         // single car by id
@@ -53,11 +62,11 @@ const run = async () => {
         // Delete single car item
         app.delete('/car/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: ObjectId(id)}
-            const result = await carsCollection.deleteOne(query)
+            const query = { _id: ObjectId(id) };
+            const result = await carsCollection.deleteOne(query);
 
-            res.send(result)
-        })
+            res.send(result);
+        });
 
         // change car quantity
         app.put('/car/:id', async (req, res) => {
