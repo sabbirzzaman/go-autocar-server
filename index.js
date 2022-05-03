@@ -10,6 +10,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Json web token verification
+const verifyJwt = (req, res, next) => {
+    // get bearer
+    const authHeader = req.headers.authorization;
+
+    // if the bearer not founded
+    if (!authHeader) {
+        return res.status(401).send({ message: 'unauthorized access' });
+    }
+
+    // get access token
+    const token = authHeader.split(' ')[1];
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        // access token decoded failed
+        if (err) {
+            return res.status(403).send({ message: 'request forbidden' });
+        } else {
+            // access token decoded successfully
+            req.decoded = decoded;
+            next();
+        }
+    });
+};
+
 // Connect MongoDb
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.3xsit.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
@@ -47,13 +72,19 @@ const run = async () => {
         });
 
         // api created for all cars item
-        app.get('/my-cars', async (req, res) => {
+        app.get('/my-cars', verifyJwt, async (req, res) => {
+            const emailDecoded = req.decoded.email;
             const email = req.query.email;
-            const query = { email };
-            const cursor = carsCollection.find(query);
-            const result = await cursor.toArray();
 
-            res.send(result);
+            if (emailDecoded !== email) {
+                return res.status(403).send({ message: 'request forbidden' });
+            } else {
+                const query = { email };
+                const cursor = carsCollection.find(query);
+                const result = await cursor.toArray();
+
+                res.send(result);
+            }
         });
 
         // get the car details form the client side
