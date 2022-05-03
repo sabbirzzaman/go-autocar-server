@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const port = process.env.PORT || 5000;
@@ -22,6 +23,19 @@ const run = async () => {
     try {
         await client.connect();
         const carsCollection = client.db('carsCollection').collection('cars');
+
+        // authentication
+        app.post('/login', async (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(
+                user,
+                process.env.ACCESS_TOKEN_SECRET,
+                {
+                    expiresIn: '1d',
+                }
+            );
+            res.send({ accessToken });
+        });
 
         // api created for all cars item
         app.get('/cars', async (req, res) => {
@@ -68,7 +82,7 @@ const run = async () => {
             res.send(result);
         });
 
-        // change car quantity
+        // update car quantity
         app.put('/car/:id', async (req, res) => {
             const id = req.params.id;
             const updatedCars = req.body;
