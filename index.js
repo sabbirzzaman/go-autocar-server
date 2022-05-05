@@ -64,11 +64,26 @@ const run = async () => {
 
         // api created for all cars item
         app.get('/cars', async (req, res) => {
+            const page = parseInt(req.query.page);
+            const filter = parseInt(req.query.filter);
+
             const query = {};
             const cursor = carsCollection.find(query);
-            const result = await cursor.toArray();
+
+            let result;
+            if (page || filter) {
+                result = await cursor.skip(page*filter).limit(filter).toArray();
+            } else {
+                result = await cursor.toArray();
+            }
 
             res.send(result);
+        });
+
+        app.get('/cars-pages', async (req, res) => {
+            const count = await carsCollection.estimatedDocumentCount();
+
+            res.send({ count });
         });
 
         // api created for all cars item
